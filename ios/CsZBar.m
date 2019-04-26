@@ -78,8 +78,16 @@
         } else {
             infoButtonIndex = 3;
         }
-        UIView *infoButton = [[[[[self.scanReader.view.subviews objectAtIndex:2] subviews] objectAtIndex:0] subviews] objectAtIndex:infoButtonIndex];
-        [infoButton setHidden:YES];
+
+        UIView *toolView = self.scanReader.view.subviews[2];
+        UIToolbar *tb = toolView.subviews[0];
+//        tb.frame = CGRectMake(0, 0, 320, 22);
+        NSMutableArray * barButtonItems = [NSMutableArray arrayWithArray:tb.items];
+        [barButtonItems removeLastObject];
+        [tb setItems:barButtonItems];
+        
+        // UIView *infoButton = [[[[[self.scanReader.view.subviews objectAtIndex:2] subviews] objectAtIndex:0] subviews] objectAtIndex:infoButtonIndex];
+        // [infoButton setHidden:YES];
 
         //UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem]; [button setTitle:@"Press Me" forState:UIControlStateNormal]; [button sizeToFit]; [self.view addSubview:button];
         CGRect screenRect = [[UIScreen mainScreen] bounds];
