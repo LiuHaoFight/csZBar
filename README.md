@@ -10,7 +10,7 @@ In this fork a button has been added to turn off and on device flash. In additio
 
 ## Installation
 
-    cordova plugin add cordova-plugin-cszbar
+    ionic cordova plugin add  @osvlabs/cordova-plugin-cszbar-vitta@latest
 
 ## API
 
