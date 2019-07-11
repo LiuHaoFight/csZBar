@@ -117,7 +117,7 @@
         <resource-file src="ios/Resources/saoyisao@2x.png" />
         <resource-file src="ios/Resources/saoyisao@3x.png" />
         <resource-file src="ios/Resources/saoyisao-3@2x.png" />
-        <resource-file src="ios/Resources/saoyisao-3@2x.png" />
+        <resource-file src="ios/Resources/saoyisao-3@3x.png" />
     </platform>
 
 </plugin>
