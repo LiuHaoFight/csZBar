@@ -2,8 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/csZbarScannerView"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@color/csZbarScannerBackground" >
+    android:layout_height="wrap_content">
 
     <TextView android:id="@+id/csZbarScannerTitle"
         android:layout_width="match_parent"
@@ -16,9 +15,8 @@
         android:gravity="center"
         android:text="@string/csZbarScannerTitle"
         android:textColor="@color/csZbarScannerTextColor"
-        android:background="@color/csZbarScannerTextBackground"
         android:fontFamily="sans-serif-light"
-        android:textSize="15pt" />
+        android:textSize="15pt"/>
 
     <TextView android:id="@+id/csZbarScannerInstructions"
         android:layout_gravity="center|bottom"
@@ -32,12 +30,55 @@
         android:textSize="8pt"
         android:textColor="@color/csZbarScannerTextColor"
         android:fontFamily="sans-serif-light"
-        android:text="@string/csZbarScannerInstructions" />
+        android:text="@string/csZbarScannerInstructions"/>
 
     <RelativeLayout android:id="@+id/csZbarScannerSightContainer"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
+        android:background="#00000000"
         android:layout_gravity="center_horizontal|bottom">
+        <View android:id="@+id/coverTop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/scanLayout"
+            android:background="@color/csZbarScannerTextBackground"
+            />
+        <View android:id="@+id/coverBottom"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/scanLayout"
+            android:background="@color/csZbarScannerTextBackground"
+            />
+
+        <LinearLayout
+            android:id="@+id/scanLayout"
+            android:layout_width="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_height="300dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            >
+            <View android:id="@+id/coverLeft"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/csZbarScannerTextBackground"
+                android:layout_weight="1"
+                />
+            <ImageView android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:id="@+id/scanImage"
+                android:background="#00000000"
+                android:src="@drawable/saoyisao"/>
+            <View android:id="@+id/coverRight"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/csZbarScannerTextBackground"
+                android:layout_weight="1"
+                />
+
+
+        </LinearLayout>
+
 
         <View android:id="@+id/csZbarScannerSight"
             android:layout_width="match_parent"
@@ -46,20 +87,20 @@
             android:layout_marginRight="10dp"
             android:layout_centerInParent="true"
             android:gravity="center_vertical"
-            android:background="#ff0000" />
+            android:background="#ff0000"/>
 
         <ImageButton
             android:layout_width="60dp"
             android:layout_height="70dp"
             android:id="@+id/imageButton"
             android:src="@drawable/camera_flash"
-            android:background="@color/csZbarScannerTextBackground"
             android:onClick="toggleFlash"
+            android:background="#00000000"
             android:longClickable="true"
             android:visibility="visible"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"/>
 
     </RelativeLayout>
 
