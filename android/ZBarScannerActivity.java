@@ -144,13 +144,18 @@ implements SurfaceHolder.Callback {
             // Initiate instance variables
             autoFocusHandler = new Handler();
             scanner = new ImageScanner();
-            scanner.setConfig(0, Config.X_DENSITY, 3);
-            scanner.setConfig(0, Config.Y_DENSITY, 3);
+            // scanner.setConfig(0, Config.X_DENSITY, 3);
+            // scanner.setConfig(0, Config.Y_DENSITY, 3);
+
+            // just QRCode support
+            scanner.setConfig(0, Config.ENABLE, 0);
+            scanner.setConfig(Symbol.QRCODE, Config.ENABLE, 1);
+
 
             // Set the config for barcode formats
-            for(ZBarcodeFormat format : getFormats()) {
-                scanner.setConfig(format.getId(), Config.ENABLE, 1);
-            }
+            // for(ZBarcodeFormat format : getFormats()) {
+                // scanner.setConfig(format.getId(), Config.ENABLE, 1);
+            // }
 
             // Set content view
             setContentView(getResourceId("layout/cszbarscanner"));
