@@ -319,7 +319,7 @@
     UIVisualEffectView *effectView =
         [[UIVisualEffectView alloc] initWithEffect:blur];
     effectView.frame = maskView.frame;
-    effectView.alpha = 0.7;
+    effectView.alpha = 0.9;
     [maskView addSubview:effectView];
     [effectView mas_makeConstraints:^(MASConstraintMaker *make) {
       make.edges.mas_equalTo(maskView);
