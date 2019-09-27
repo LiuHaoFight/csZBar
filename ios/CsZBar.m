@@ -15,6 +15,7 @@
 @property(nonatomic, assign) CGSize tipSize;
 @property(nonatomic, assign) CGFloat statusHeight;
 @property(nonatomic, strong) UIView *lineView;
+@property(nonatomic, strong) NSString *imgBaseStr;
 @end
 
 #pragma mark - Synthesize
@@ -65,7 +66,8 @@
 
     UIBezierPath *maskPath =
         [UIBezierPath bezierPathWithRect:self.scanReader.view.bounds];
-    UIBezierPath *appendPath = [UIBezierPath bezierPathWithRect:maskRect];
+    UIBezierPath *appendPath = [UIBezierPath bezierPathWithRoundedRect:maskRect
+                                                          cornerRadius:12.0];
     [maskPath appendPath:[appendPath bezierPathByReversingPath]];
 
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
@@ -121,6 +123,10 @@
 
 - (void)scan:(CDVInvokedUrlCommand *)command;
 {
+  NSArray *arguments = command.arguments;
+  if (arguments.count > 0) {
+    self.imgBaseStr = [NSString stringWithFormat:@"%@", arguments.firstObject];
+  }
   if (self.scanInProgress) {
     [self.commandDelegate
         sendPluginResult:[CDVPluginResult
@@ -246,13 +252,17 @@
     CGRect maskRect =
         CGRectMake((self.scanReader.view.frame.size.width - 200) * 0.5,
                    6 + 34 + self.statusHeight, scanW, scanH);
+    CGFloat marginY = (self.scanReader.view.frame.size.height - 6 - 34 -
+                       self.statusHeight - self.tipSize.height) *
+                          0.5 -
+                      200 - 20;
     UIView *scanImage = [[UIView alloc] init];
     scanImage.frame = maskRect;
     [self.scanReader.view addSubview:scanImage];
     [scanImage mas_makeConstraints:^(MASConstraintMaker *make) {
       make.width.mas_equalTo(scanW);
       make.height.mas_equalTo(scanH);
-      make.top.mas_equalTo(backButton.mas_bottom).mas_offset(self.tipSize);
+      make.top.mas_equalTo(backButton.mas_bottom).mas_offset(marginY);
       make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
     }];
     [scanImage.superview layoutIfNeeded];
@@ -309,7 +319,7 @@
     UIVisualEffectView *effectView =
         [[UIVisualEffectView alloc] initWithEffect:blur];
     effectView.frame = maskView.frame;
-    effectView.alpha = 0.5;
+    effectView.alpha = 0.7;
     [maskView addSubview:effectView];
     [effectView mas_makeConstraints:^(MASConstraintMaker *make) {
       make.edges.mas_equalTo(maskView);
@@ -340,19 +350,29 @@
           .mas_offset(masOffset);
     }];
     [tipLabel.superview layoutIfNeeded];
-    CGFloat tipHeight = tipLabel.frame.size.height;
-    NSLog(@"tipHeight === %f", tipHeight);
-    CGFloat margin =
-        (maskH - 6 - 34 - self.statusHeight - self.tipSize.height) * 0.5 - 200 -
-        20;
-    NSLog(@"margin === %f", margin);
+
+    UIImageView *tipImageView = [[UIImageView alloc]
+        initWithImage:[UIImage imageWithData:[self.imgBaseStr
+                                                 dataUsingEncoding:
+                                                     NSUTF8StringEncoding]]];
+    tipImageView.layer.cornerRadius = 10.0;
+    tipImageView.layer.masksToBounds = YES;
+    tipImageView.backgroundColor = [UIColor whiteColor];
+    [self.scanReader.view addSubview:tipImageView];
+    [tipImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+      make.top.mas_equalTo(tipLabel.mas_bottom).mas_offset(20);
+      make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
+      make.width.mas_equalTo(scanW);
+      make.height.mas_equalTo(scanH);
+    }];
+    [tipImageView.superview layoutIfNeeded];
 
     //从蒙版中扣出扫描框那一块,这块的大小尺寸将来也设成扫描输出的作用域大小
 
     UIBezierPath *maskPath =
         [UIBezierPath bezierPathWithRect:self.scanReader.view.bounds];
     UIBezierPath *appendPath = [UIBezierPath bezierPathWithRoundedRect:maskRect
-                                                          cornerRadius:12.0];
+                                                          cornerRadius:10.0];
     [maskPath appendPath:[appendPath bezierPathByReversingPath]];
 
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
@@ -376,6 +396,7 @@
 
     [self.scanReader.view bringSubviewToFront:backButton];
     [self.scanReader.view bringSubviewToFront:scanImage];
+    [self.scanReader.view bringSubviewToFront:tipImageView];
     [self startAnim];
     [self.viewController presentViewController:self.scanReader
                                       animated:YES
