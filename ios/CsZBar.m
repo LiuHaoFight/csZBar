@@ -304,7 +304,16 @@
     }];
     self.maskView = maskView;
 
-    [maskView layoutIfNeeded];
+    [maskView.superview layoutIfNeeded];
+    UIBlurEffect *blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+    UIVisualEffectView *effectView =
+        [[UIVisualEffectView alloc] initWithEffect:blur];
+    effectView.frame = maskView.frame;
+    effectView.alpha = 0.5;
+    [maskView addSubview:effectView];
+    [effectView mas_makeConstraints:^(MASConstraintMaker *make) {
+      make.edges.mas_equalTo(maskView);
+    }];
     [scanImage layoutIfNeeded];
     CGFloat maskW = maskView.frame.size.width;
     CGFloat maskH = maskView.frame.size.height;
