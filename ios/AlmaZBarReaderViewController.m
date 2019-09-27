@@ -15,6 +15,7 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [[UIApplication sharedApplication] setStatusBarHidden:YES];
   // Do any additional setup after loading the view.
   UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
   //[button setTitle:@"Flash" forState:UIControlStateNormal];
@@ -44,7 +45,11 @@
 }
 
 - (BOOL)prefersStatusBarHidden {
-  return YES;
+  return NO;
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+  return UIStatusBarStyleLightContent;
 }
 
 - (void)didReceiveMemoryWarning {

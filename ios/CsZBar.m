@@ -10,7 +10,11 @@
 @property NSString *scanCallbackId;
 @property AlmaZBarReaderViewController *scanReader;
 @property(nonatomic, strong) UIView *maskView;
-@property(nonatomic, strong) UIImageView *scanView;
+@property(nonatomic, strong) UIView *scanView;
+@property(nonatomic, strong) NSString *tip;
+@property(nonatomic, assign) CGSize tipSize;
+@property(nonatomic, assign) CGFloat statusHeight;
+@property(nonatomic, strong) UIView *lineView;
 @end
 
 #pragma mark - Synthesize
@@ -38,31 +42,39 @@
 
 - (void)didChangeRotate:(NSNotification *)notice {
   if (nil != self.maskView) {
+    CGFloat maskW = self.maskView.frame.size.width;
+    CGFloat maskH = self.maskView.frame.size.height;
+    CGFloat maskX = self.maskView.frame.origin.x;
+    CGFloat maskY = self.maskView.frame.origin.y;
+    //        CGFloat scanW = self.scanView.frame.size.width;
+    //        CGFloat scanH = self.scanView.frame.size.height;
+    CGFloat scanW = 200;
+    CGFloat scanH = 200;
+    CGFloat scanX = self.scanView.frame.origin.x;
+    CGFloat scanY = self.scanView.frame.origin.y;
+    CGRect maskRect =
+        CGRectMake((self.scanReader.view.frame.size.width - 200) * 0.5,
+                   6 + 34 + self.statusHeight, scanW, scanH);
     [self.scanReader.view
         setFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width,
                             [UIScreen mainScreen].bounds.size.height)];
     [self.maskView layoutIfNeeded];
     [self.scanView layoutIfNeeded];
-    CGFloat maskW = self.maskView.frame.size.width;
-    CGFloat maskH = self.maskView.frame.size.height;
-    CGFloat maskX = self.maskView.frame.origin.x;
-    CGFloat maskY = self.maskView.frame.origin.y;
-    CGFloat scanW = self.scanView.frame.size.width;
-    CGFloat scanH = self.scanView.frame.size.height;
-    CGFloat scanX = self.scanView.frame.origin.x;
-    CGFloat scanY = self.scanView.frame.origin.y;
+
     //从蒙版中扣出扫描框那一块,这块的大小尺寸将来也设成扫描输出的作用域大小
+
     UIBezierPath *maskPath =
         [UIBezierPath bezierPathWithRect:self.scanReader.view.bounds];
-    UIBezierPath *appendPath = [UIBezierPath
-        bezierPathWithRect:CGRectMake((maskH - scanH) * 0.5,
-                                      (maskW - scanW) * 0.5, scanH, scanW)];
+    UIBezierPath *appendPath = [UIBezierPath bezierPathWithRect:maskRect];
     [maskPath appendPath:[appendPath bezierPathByReversingPath]];
 
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
     maskLayer.path = maskPath.CGPath;
     [self.maskView.layer.mask removeFromSuperlayer];
     self.maskView.layer.mask = maskLayer;
+    CGRect sc = [self getScanCrop:maskRect
+                 readerViewBounds:self.scanReader.readerView.bounds];
+    self.scanReader.scanCrop = sc;
   }
 }
 
@@ -76,6 +88,33 @@
 - (BOOL)shouldAutorotateToInterfaceOrientation:
     (UIInterfaceOrientation)interfaceOrientation {
   return YES;
+}
+
+#pragma mark - Lazy
+
+- (NSString *)tip {
+  if (nil == _tip) {
+    _tip = @"请扫描设备后盖的二维码";
+  }
+  return _tip;
+}
+
+- (CGSize)tipSize {
+  if (CGSizeEqualToSize(_tipSize, CGSizeZero)) {
+    _tipSize = [self.tip sizeWithFont:[UIFont boldSystemFontOfSize:16.0]
+                    constrainedToSize:CGSizeMake(200, MAXFLOAT)];
+  }
+  NSLog(@"tip size === %f", _tipSize.height);
+  return _tipSize;
+}
+
+- (CGFloat)statusHeight {
+  if (0 == _statusHeight) {
+    //获取状态栏的rect
+    CGRect statusRect = [[UIApplication sharedApplication] statusBarFrame];
+    _statusHeight = statusRect.size.height;
+  }
+  return _statusHeight;
 }
 
 #pragma mark - Plugin API
@@ -133,6 +172,7 @@
 
     UIView *toolView = self.scanReader.view.subviews[2];
     UIToolbar *tb = toolView.subviews[0];
+    [toolView removeFromSuperview];
     //        tb.frame = CGRectMake(0, 0, 320, 22);
     NSMutableArray *barButtonItems = [NSMutableArray arrayWithArray:tb.items];
     [barButtonItems removeLastObject];
@@ -167,7 +207,7 @@
 
     NSArray *buttons = [NSArray arrayWithObjects:buttonFlash, nil];
     [toolbarViewFlash setItems:buttons animated:NO];
-    [self.scanReader.view addSubview:toolbarViewFlash];
+    //        [self.scanReader.view addSubview:toolbarViewFlash];
 
     //        if (drawSight) {
     CGFloat dim =
@@ -183,23 +223,76 @@
 
     self.scanReader.cameraOverlayView = polygonView;
     //        }
+    UIButton *backButton = [[UIButton alloc]
+        initWithFrame:CGRectMake(16, 6 + self.statusHeight, 34, 34)];
+    [backButton setImage:[UIImage imageNamed:@"icon_back_white_34x34.png"]
+                forState:UIControlStateNormal];
+    [backButton addTarget:self
+                   action:@selector(backButtonClicked)
+         forControlEvents:UIControlEventTouchUpInside];
+    [self.scanReader.view addSubview:backButton];
+    [backButton mas_makeConstraints:^(MASConstraintMaker *make) {
+      make.top.mas_equalTo(self.scanReader.view.mas_top)
+          .mas_offset(6 + self.statusHeight);
+      make.left.mas_equalTo(self.scanReader.view.mas_left).mas_offset(16);
+      make.width.mas_equalTo(34);
+      make.height.mas_equalTo(34);
+    }];
 
     CGFloat imageX = screenWidth * 0.15;
     CGFloat imageY = screenWidth * 0.15 + 64;
-    UIImageView *scanImage =
-        [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"saoyisao"]];
-    scanImage.frame =
-        CGRectMake(imageX, imageY + 44, screenWidth * 0.7, screenWidth * 0.7);
+    CGFloat scanW = 200;
+    CGFloat scanH = 200;
+    CGRect maskRect =
+        CGRectMake((self.scanReader.view.frame.size.width - 200) * 0.5,
+                   6 + 34 + self.statusHeight, scanW, scanH);
+    UIView *scanImage = [[UIView alloc] init];
+    scanImage.frame = maskRect;
     [self.scanReader.view addSubview:scanImage];
     [scanImage mas_makeConstraints:^(MASConstraintMaker *make) {
-      make.width.mas_equalTo(self.scanReader.view.frame.size.width * 0.7);
-      make.height.mas_equalTo(self.scanReader.view.frame.size.width * 0.7);
-      make.center.mas_equalTo(self.scanReader.view);
+      make.width.mas_equalTo(scanW);
+      make.height.mas_equalTo(scanH);
+      make.top.mas_equalTo(backButton.mas_bottom).mas_offset(self.tipSize);
+      make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
     }];
+    [scanImage.superview layoutIfNeeded];
+
+    UIView *lineView = [[UIView alloc] init];
+    lineView.frame = CGRectMake(0, 0, 210, 2);
+
+    CAGradientLayer *gl = [CAGradientLayer layer];
+    gl.frame = lineView.frame;
+    gl.startPoint = CGPointMake(0.5, 0);
+    gl.endPoint = CGPointMake(0.5, 1);
+    gl.colors = @[
+      (__bridge id)[UIColor colorWithRed:118 / 255.0
+                                   green:213 / 255.0
+                                    blue:213 / 255.0
+                                   alpha:1.0]
+          .CGColor,
+      (__bridge id)[UIColor colorWithRed:65 / 255.0
+                                   green:170 / 255.0
+                                    blue:170 / 255.0
+                                   alpha:1.0]
+          .CGColor
+    ];
+    gl.locations = @[ @(0), @(1.0f) ];
+    [lineView.layer addSublayer:gl];
+    lineView.layer.cornerRadius = 1;
+    [scanImage addSubview:lineView];
+    self.lineView = lineView;
+    self.scanView = scanImage;
+    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+      make.top.mas_equalTo(scanImage.mas_top);
+      make.centerX.mas_equalTo(scanImage.mas_centerX);
+      make.width.mas_equalTo(210);
+      make.height.mas_equalTo(2);
+    }];
+    [self.scanView layoutIfNeeded];
 
     //添加全屏的黑色半透明蒙版
     UIView *maskView = [[UIView alloc]
-        initWithFrame:CGRectMake(0, 44, self.scanReader.view.frame.size.width,
+        initWithFrame:CGRectMake(0, 0, self.scanReader.view.frame.size.width,
                                  self.scanReader.view.frame.size.height)];
     maskView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.5];
     [self.scanReader.view addSubview:maskView];
@@ -210,32 +303,108 @@
       make.bottom.mas_equalTo(self.scanReader.view.mas_bottom);
     }];
     self.maskView = maskView;
-    self.scanView = scanImage;
+
     [maskView layoutIfNeeded];
     [scanImage layoutIfNeeded];
     CGFloat maskW = maskView.frame.size.width;
     CGFloat maskH = maskView.frame.size.height;
     CGFloat maskX = maskView.frame.origin.x;
     CGFloat maskY = maskView.frame.origin.y;
-    CGFloat scanW = scanImage.frame.size.width;
-    CGFloat scanH = scanImage.frame.size.height;
+    //        CGFloat scanW = scanImage.frame.size.width;
+    //        CGFloat scanH = scanImage.frame.size.height;
     CGFloat scanX = scanImage.frame.origin.x;
     CGFloat scanY = scanImage.frame.origin.y;
+
+    UILabel *tipLabel = [[UILabel alloc] init];
+    [tipLabel setFont:[UIFont boldSystemFontOfSize:16.0]];
+    tipLabel.text = self.tip;
+    [tipLabel setTextColor:[UIColor whiteColor]];
+    tipLabel.numberOfLines = 0;
+    [self.scanReader.view addSubview:tipLabel];
+    CGFloat masOffset = 0;
+    if ([UIScreen mainScreen].bounds.size.height > 667) {
+      masOffset = -self.statusHeight - 6 - 34;
+    }
+    [tipLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+      make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
+      make.centerY.mas_equalTo(self.scanReader.view.mas_centerY)
+          .mas_offset(masOffset);
+    }];
+    [tipLabel.superview layoutIfNeeded];
+    CGFloat tipHeight = tipLabel.frame.size.height;
+    NSLog(@"tipHeight === %f", tipHeight);
+    CGFloat margin =
+        (maskH - 6 - 34 - self.statusHeight - self.tipSize.height) * 0.5 - 200 -
+        20;
+    NSLog(@"margin === %f", margin);
+
     //从蒙版中扣出扫描框那一块,这块的大小尺寸将来也设成扫描输出的作用域大小
+
     UIBezierPath *maskPath =
         [UIBezierPath bezierPathWithRect:self.scanReader.view.bounds];
-    UIBezierPath *appendPath = [UIBezierPath
-        bezierPathWithRect:CGRectMake((maskW - scanW) * 0.5,
-                                      (maskH - scanH) * 0.5, scanW, scanH)];
+    UIBezierPath *appendPath = [UIBezierPath bezierPathWithRoundedRect:maskRect
+                                                          cornerRadius:12.0];
     [maskPath appendPath:[appendPath bezierPathByReversingPath]];
 
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
     maskLayer.path = maskPath.CGPath;
     maskView.layer.mask = maskLayer;
+    CGRect sc = [self getScanCrop:maskRect
+                 readerViewBounds:self.scanReader.readerView.bounds];
+
+    self.scanReader.scanCrop = sc;
+    for (int i = 0; i <= self.scanReader.view.subviews.count - 1; i++) {
+      UIView *tempView = self.scanReader.view.subviews[i];
+      if (![tempView isKindOfClass:NSClassFromString(@"ZBarReaderViewImpl")]) {
+        continue;
+      } else {
+        [tempView mas_makeConstraints:^(MASConstraintMaker *make) {
+          make.edges.mas_equalTo(self.scanReader.view);
+        }];
+        [tempView.superview layoutIfNeeded];
+      }
+    }
+
+    [self.scanReader.view bringSubviewToFront:backButton];
+    [self.scanReader.view bringSubviewToFront:scanImage];
+    [self startAnim];
     [self.viewController presentViewController:self.scanReader
                                       animated:YES
                                     completion:nil];
   }
+}
+
+- (void)startAnim {
+
+  [UIView animateWithDuration:3
+                        delay:0
+                      options:UIViewAnimationOptionRepeat
+                   animations:^{
+                     // todo 不生效
+                     //        [self.lineView
+                     //        mas_updateConstraints:^(MASConstraintMaker *make)
+                     //        {
+                     //            make.top.mas_equalTo(self.scanView.mas_top).mas_offset(self.scanView.frame.size.height);
+                     //        }];
+                     //        [self.scanView layoutIfNeeded];
+                   }
+                   completion:nil];
+}
+
+- (void)backButtonClicked {
+  self.scanInProgress = NO;
+  [self.scanReader dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (CGRect)getScanCrop:(CGRect)rect readerViewBounds:(CGRect)readerViewBounds {
+  CGFloat x, y, width, height;
+
+  x = rect.origin.x / readerViewBounds.size.width;
+  y = rect.origin.y / readerViewBounds.size.height;
+  width = rect.size.width / readerViewBounds.size.width;
+  height = rect.size.height / readerViewBounds.size.height;
+
+  return CGRectMake(x, y, width, height);
 }
 
 - (void)toggleflash {
