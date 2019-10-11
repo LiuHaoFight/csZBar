@@ -63,8 +63,8 @@
     maskLayer.path = maskPath.CGPath;
     [self.maskView.layer.mask removeFromSuperlayer];
     self.maskView.layer.mask = maskLayer;
-    CGRect sc = [self getPortraitModeScanCropRect:maskRect
-                                   forOverlayView:self.scanReader.readerView];
+    CGRect sc = [self getScanCrop:maskRect
+                 readerViewBounds:self.scanReader.readerView.bounds];
     self.scanReader.scanCrop = sc;
   }
 }
@@ -299,7 +299,7 @@
     self.lineView = lineView;
     self.scanView = scanImage;
     [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
-      make.top.mas_equalTo(scanImage.mas_top).mas_offset(-marginY);
+      make.top.mas_equalTo(scanImage.mas_top).mas_offset(1);
       make.centerX.mas_equalTo(scanImage.mas_centerX);
       make.width.mas_equalTo(scanH + 10);
       make.height.mas_equalTo(2);
@@ -380,23 +380,24 @@
     CGRect sc = [self getPortraitModeScanCropRect:maskRect
                                    forOverlayView:self.scanReader.readerView];
     self.scanReader.scanCrop = sc;
-    //        [self startAnim];
     [self.viewController presentViewController:self.scanReader
                                       animated:YES
-                                    completion:nil];
+                                    completion:^{
+                                      [self startAnim];
+                                    }];
   }
 }
 
 - (void)startAnim {
 
-  [UIView animateWithDuration:3
+  [UIView animateWithDuration:2.5
                         delay:0
                       options:UIViewAnimationOptionRepeat
                    animations:^{
                      [self.lineView
                          mas_updateConstraints:^(MASConstraintMaker *make) {
                            make.top.mas_equalTo(self.scanView.mas_top)
-                               .mas_offset(self.scanView.frame.size.height - 1);
+                               .mas_offset(self.scanView.frame.size.height - 2);
                          }];
                      [self.lineView.superview layoutIfNeeded];
                    }
