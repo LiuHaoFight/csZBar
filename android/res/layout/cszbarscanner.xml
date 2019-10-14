@@ -1,107 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/csZbarScannerView"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-
-    <TextView android:id="@+id/csZbarScannerTitle"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:paddingTop="15dp"
-        android:paddingBottom="5dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:gravity="center"
-        android:text="@string/csZbarScannerTitle"
-        android:textColor="@color/csZbarScannerTextColor"
-        android:fontFamily="sans-serif-light"
-        android:textSize="15pt"/>
+        android:layout_height="match_parent">
 
-    <TextView android:id="@+id/csZbarScannerInstructions"
-        android:layout_gravity="center|bottom"
-        android:layout_width="296dp"
-        android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:paddingBottom="15dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:gravity="center"
-        android:textSize="8pt"
-        android:textColor="@color/csZbarScannerTextColor"
-        android:fontFamily="sans-serif-light"
-        android:text="@string/csZbarScannerInstructions"/>
+    <FrameLayout
+            android:id="@+id/csZbarScannerView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-    <RelativeLayout android:id="@+id/csZbarScannerSightContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:background="#00000000"
-        android:layout_gravity="center_horizontal|bottom">
-        <View android:id="@+id/coverTop"
+    <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_above="@+id/scanLayout"
-            android:background="@color/csZbarScannerTextBackground"
-            />
-        <View android:id="@+id/coverBottom"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/scanLayout"
-            android:background="@color/csZbarScannerTextBackground"
-            />
+            android:layout_alignParentTop="true"
+            android:background="@color/csZbarScannerTextBackground">
 
-        <LinearLayout
-            android:id="@+id/scanLayout"
-            android:layout_width="match_parent"
-            android:layout_centerInParent="true"
-            android:layout_height="300dp"
-            android:orientation="horizontal"
-            android:gravity="center"
-            >
-            <View android:id="@+id/coverLeft"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/csZbarScannerTextBackground"
-                android:layout_weight="1"
-                />
-            <ImageView android:layout_width="300dp"
-                android:layout_height="300dp"
-                android:id="@+id/scanImage"
-                android:background="#00000000"
-                android:src="@drawable/saoyisao"/>
-            <View android:id="@+id/coverRight"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/csZbarScannerTextBackground"
-                android:layout_weight="1"
-                />
-
-
-        </LinearLayout>
-
-
-        <View android:id="@+id/csZbarScannerSight"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_centerInParent="true"
-            android:gravity="center_vertical"
-            android:background="#ff0000"/>
-
-        <ImageButton
-            android:layout_width="60dp"
-            android:layout_height="70dp"
-            android:id="@+id/imageButton"
-            android:src="@drawable/camera_flash"
-            android:onClick="toggleFlash"
-            android:background="#00000000"
-            android:longClickable="true"
-            android:visibility="visible"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"/>
-
+        <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:padding="10dp"
+                android:src="@drawable/ic_action_discard_dark" />
     </RelativeLayout>
 
-</FrameLayout>
+        <RelativeLayout
+                android:id="@+id/scanLayout"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_above="@id/centerView"
+                android:orientation="horizontal">
+
+            <View
+                    android:id="@+id/coverLeft"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@+id/scanImage"
+                    android:layout_weight="1"
+                    android:background="@color/csZbarScannerTextBackground" />
+
+            <ImageView
+                    android:id="@+id/scanImage"
+                    android:layout_width="220dp"
+                    android:layout_height="220dp"
+                    android:layout_centerInParent="true"
+                    android:background="#00000000" />
+
+            <View
+                    android:id="@+id/coverRight"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/scanImage"
+                    android:background="@color/csZbarScannerTextBackground" />
+
+            <View
+                    android:id="@+id/csZbarScannerSight"
+                    android:layout_width="240dp"
+                    android:layout_height="1dp"
+                    android:layout_centerInParent="true"
+                    android:background="#ff0000"
+                    android:gravity="center_vertical" />
+
+        </RelativeLayout>
+
+        <View
+                android:id="@+id/coverBottom"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/scanLayout"
+                android:background="@color/csZbarScannerTextBackground" />
+
+        <TextView
+                android:id="@+id/centerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:layout_margin="30dp"
+                android:text="请扫描设备后盖的二维码"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+
+
+        <ImageView
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:layout_below="@+id/centerView"
+                android:layout_centerHorizontal="true"
+                android:background="#00000000"
+                android:src="#fff" />
+
+
+
+</RelativeLayout>

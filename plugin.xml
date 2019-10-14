@@ -69,6 +69,12 @@
         <source-file src="android/res/drawable/saoyisao.png" target-dir="res/drawable-mdpi"/>
         <source-file src="android/res/drawable/saoyisao.png" target-dir="res/drawable-xhdpi"/>
         <source-file src="android/res/drawable/saoyisao.png" target-dir="res/drawable-xxhdpi"/>
+        <source-file src="android/res/drawable/icon_back_white_34x34.png" target-dir="res/drawable"/>
+        <source-file src="android/res/drawable/icon_back_white_34x34.png" target-dir="res/drawable-hdpi"/>
+        <source-file src="android/res/drawable/icon_back_white_34x34.png" target-dir="res/drawable-ldpi"/>
+        <source-file src="android/res/drawable/icon_back_white_34x34.png" target-dir="res/drawable-mdpi"/>
+        <source-file src="android/res/drawable/icon_back_white_34x34.png" target-dir="res/drawable-xhdpi"/>
+        <source-file src="android/res/drawable/icon_back_white_34x34.png" target-dir="res/drawable-xxhdpi"/>
     </platform>
 
     <platform name="ios">

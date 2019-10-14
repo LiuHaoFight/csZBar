@@ -2,6 +2,9 @@ package org.cloudsky.cordovaPlugins;
 
 import java.io.IOException;
 import java.lang.RuntimeException;
+
+import android.graphics.Color;
+import android.widget.ImageView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -105,6 +108,8 @@ public class ZBarScannerActivity
     }
     super.onCreate(savedInstanceState);
   }
+
+  @Override
   public void onRequestPermissionsResult(int requestCode, String permissions[],
                                          int[] grantResults) {
     switch (requestCode) {
@@ -123,6 +128,7 @@ public class ZBarScannerActivity
       // permissions this app might request
     }
   }
+
   private void setUpCamera() {
     // If request is cancelled, the result arrays are empty.
 
@@ -144,13 +150,13 @@ public class ZBarScannerActivity
     // Initiate instance variables
     autoFocusHandler = new Handler();
     scanner = new ImageScanner();
+
     // scanner.setConfig(0, Config.X_DENSITY, 3);
     // scanner.setConfig(0, Config.Y_DENSITY, 3);
 
     // just QRCode support
     scanner.setConfig(0, Config.ENABLE, 0);
     scanner.setConfig(Symbol.QRCODE, Config.ENABLE, 1);
-
     // Set the config for barcode formats
     // for(ZBarcodeFormat format : getFormats()) {
     // scanner.setConfig(format.getId(), Config.ENABLE, 1);
@@ -160,12 +166,12 @@ public class ZBarScannerActivity
     setContentView(getResourceId("layout/cszbarscanner"));
 
     // Update view with customisable strings
-    TextView view_textTitle =
-        (TextView)findViewById(getResourceId("id/csZbarScannerTitle"));
-    TextView view_textInstructions =
-        (TextView)findViewById(getResourceId("id/csZbarScannerInstructions"));
-    view_textTitle.setText(textTitle);
-    view_textInstructions.setText(textInstructions);
+    //    TextView view_textTitle =
+    //        (TextView)findViewById(getResourceId("id/csZbarScannerTitle"));
+    //    TextView view_textInstructions =
+    //        (TextView)findViewById(getResourceId("id/csZbarScannerInstructions"));
+    //    view_textTitle.setText(textTitle);
+    //    view_textInstructions.setText(textInstructions);
 
     // Draw/hide the sight
     if (!drawSight) {
@@ -192,10 +198,10 @@ public class ZBarScannerActivity
         (FrameLayout)findViewById(getResourceId("id/csZbarScannerView"));
     scannerView.addView(scannerSurface);
 
-    findViewById(getResourceId("id/csZbarScannerTitle")).bringToFront();
-    findViewById(getResourceId("id/csZbarScannerInstructions")).bringToFront();
-    findViewById(getResourceId("id/csZbarScannerSightContainer"))
-        .bringToFront();
+    //    findViewById(getResourceId("id/csZbarScannerTitle")).bringToFront();
+    //    findViewById(getResourceId("id/csZbarScannerInstructions")).bringToFront();
+    //    findViewById(getResourceId("id/csZbarScannerSightContainer"))
+    //        .bringToFront();
     findViewById(getResourceId("id/csZbarScannerSight")).bringToFront();
     scannerView.requestLayout();
     scannerView.invalidate();
@@ -219,8 +225,9 @@ public class ZBarScannerActivity
         camera = Camera.open();
       }
 
-      if (camera == null)
+      if (camera == null) {
         throw new Exception("Error: No suitable camera found.");
+      }
     } catch (RuntimeException e) {
       // die("Error: Could not open the camera.");
       return;
@@ -229,6 +236,7 @@ public class ZBarScannerActivity
       return;
     }
   }
+
   private void setCameraDisplayOrientation(Activity activity, int cameraId) {
     android.hardware.Camera.CameraInfo info =
         new android.hardware.Camera.CameraInfo();
@@ -260,6 +268,7 @@ public class ZBarScannerActivity
     }
     camera.setDisplayOrientation(result);
   }
+
   @Override
   public void onPause() {
     releaseCamera();
@@ -268,8 +277,9 @@ public class ZBarScannerActivity
 
   @Override
   public void onDestroy() {
-    if (scanner != null)
+    if (scanner != null) {
       scanner.destroy();
+    }
     super.onDestroy();
   }
 
@@ -299,8 +309,9 @@ public class ZBarScannerActivity
   @Override
   public void surfaceChanged(SurfaceHolder hld, int fmt, int w, int h) {
     // Sanity check - holder must have a surface...
-    if (hld.getSurface() == null)
+    if (hld.getSurface() == null) {
       die("There is no camera surface");
+    }
 
     surfW = w;
     surfH = h;
@@ -310,6 +321,8 @@ public class ZBarScannerActivity
     holder = hld;
     tryStartPreview();
   }
+
+  @Override
   public void onConfigurationChanged(Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
     int rotation = getWindowManager().getDefaultDisplay().getRotation();
@@ -347,11 +360,13 @@ public class ZBarScannerActivity
     try {
       if (camParams.getFlashMode().equals(Parameters.FLASH_MODE_OFF) &&
           !(camParams.getFlashMode().equals(Parameters.FLASH_MODE_TORCH)) &&
-          !(camParams.getFlashMode().equals(Parameters.FLASH_MODE_ON)))
+          !(camParams.getFlashMode().equals(Parameters.FLASH_MODE_ON))) {
         camParams.setFlashMode(Parameters.FLASH_MODE_TORCH);
-      else // if(camParams.getFlashMode() == Parameters.FLASH_MODE_ON ||
-           // camParams.getFlashMode()== Parameters.FLASH_MODE_TORCH)
+      } else // if(camParams.getFlashMode() == Parameters.FLASH_MODE_ON ||
+             // camParams.getFlashMode()== Parameters.FLASH_MODE_TORCH)
+      {
         camParams.setFlashMode(Parameters.FLASH_MODE_OFF);
+      }
     } catch (RuntimeException e) {
     }
 
@@ -361,12 +376,11 @@ public class ZBarScannerActivity
       camera.setPreviewCallback(previewCb);
       camera.startPreview();
       if (android.os.Build.VERSION.SDK_INT >= 14) {
-        camera.autoFocus(
-            autoFocusCb); // We are not using any of the
-                          // continuous autofocus modes as that does not seem to
-                          // work well with flash setting of "on"... At least
-                          // with this simple and stupid focus method, we get to
-                          // turn the flash on during autofocus.
+        camera.autoFocus(autoFocusCb); // We are not using any of the
+        // continuous autofocus modes as that does not seem to
+        // work well with flash setting of "on"... At least
+        // with this simple and stupid focus method, we get to
+        // turn the flash on during autofocus.
         camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
       }
       // tryStopPreview();
@@ -389,6 +403,7 @@ public class ZBarScannerActivity
   // For API Level < 14
 
   private AutoFocusCallback autoFocusCb = new AutoFocusCallback() {
+    @Override
     public void onAutoFocus(boolean success, Camera camera) {
       // some devices crash without this try/catch and cancelAutoFocus()... (#9)
       try {
@@ -400,9 +415,11 @@ public class ZBarScannerActivity
   };
 
   private Runnable doAutoFocus = new Runnable() {
+    @Override
     public void run() {
-      if (camera != null)
+      if (camera != null) {
         camera.autoFocus(autoFocusCb);
+      }
     }
   };
 
@@ -410,6 +427,7 @@ public class ZBarScannerActivity
 
   // Receives frames from the camera and checks for barcodes.
   private PreviewCallback previewCb = new PreviewCallback() {
+    @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
       Camera.Parameters parameters = camera.getParameters();
       try {
@@ -418,6 +436,12 @@ public class ZBarScannerActivity
         Image barcode = new Image(size.width, size.height, "Y800");
         barcode.setData(data);
 
+        int[] scanIVPosition = new int[2];
+        ImageView scanIV = findViewById(getResourceId("id/scanImage"));
+        scanIV.getLocationOnScreen(scanIVPosition);
+        // 设置扫描有效区域
+        barcode.setCrop(scanIVPosition[0], scanIVPosition[1], scanIV.getWidth(),
+                        scanIV.getHeight());
         if (scanner.scanImage(barcode) != 0) {
           String qrValue = "";
 
@@ -447,10 +471,12 @@ public class ZBarScannerActivity
   }
 
   private int getResourceId(String typeAndName) {
-    if (package_name == null)
+    if (package_name == null) {
       package_name = getApplication().getPackageName();
-    if (resources == null)
+    }
+    if (resources == null) {
       resources = getApplication().getResources();
+    }
     return resources.getIdentifier(typeAndName, null, package_name);
   }
 
@@ -562,12 +588,11 @@ public class ZBarScannerActivity
         camera.startPreview();
 
         if (android.os.Build.VERSION.SDK_INT >= 14) {
-          camera.autoFocus(
-              autoFocusCb); // We are not using any of the
-                            // continuous autofocus modes as that does not seem
-                            // to work well with flash setting of "on"... At
-                            // least with this simple and stupid focus method,
-                            // we get to turn the flash on during autofocus.
+          camera.autoFocus(autoFocusCb); // We are not using any of the
+          // continuous autofocus modes as that does not seem
+          // to work well with flash setting of "on"... At
+          // least with this simple and stupid focus method,
+          // we get to turn the flash on during autofocus.
         }
       } catch (IOException e) {
         die("Could not start camera preview: " + e.getMessage());
