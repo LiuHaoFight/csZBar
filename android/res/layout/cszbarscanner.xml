@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <FrameLayout
             android:id="@+id/csZbarScannerView"
@@ -37,11 +38,13 @@
                     android:layout_weight="1"
                     android:background="@color/csZbarScannerTextBackground" />
 
-            <ImageView
+            <com.shehuan.niv.NiceImageView
                     android:id="@+id/scanImage"
                     android:layout_width="220dp"
                     android:layout_height="220dp"
                     android:layout_centerInParent="true"
+                    app:corner_radius="12dp"
+                    app:border_color="@color/csZbarScannerTextBackground"
                     android:background="#00000000" />
 
             <View
@@ -53,10 +56,11 @@
 
             <View
                     android:id="@+id/csZbarScannerSight"
-                    android:layout_width="240dp"
+                    android:layout_width="260dp"
                     android:layout_height="1dp"
-                    android:layout_centerInParent="true"
-                    android:background="#ff0000"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:background="#41AAAA"
                     android:gravity="center_vertical" />
 
         </RelativeLayout>
@@ -81,12 +85,12 @@
                 android:textSize="16sp" />
 
 
-        <ImageView
+        <com.shehuan.niv.NiceImageView
                 android:layout_width="220dp"
                 android:layout_height="220dp"
                 android:layout_below="@+id/centerView"
                 android:layout_centerHorizontal="true"
-                android:background="#00000000"
+                app:corner_radius="12dp"
                 android:src="#fff" />
 
 

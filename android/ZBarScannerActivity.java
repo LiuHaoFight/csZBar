@@ -3,8 +3,15 @@ package org.cloudsky.cordovaPlugins;
 import java.io.IOException;
 import java.lang.RuntimeException;
 
-import android.graphics.Color;
+import android.annotation.SuppressLint;
+import android.graphics.*;
+import android.graphics.drawable.BitmapDrawable;
+import android.view.*;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
+import com.shehuan.niv.NiceImageView;
+import com.siemens.smarthome.test.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,15 +30,9 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.content.pm.PackageManager;
-import android.view.Surface;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -202,9 +203,27 @@ public class ZBarScannerActivity
     //    findViewById(getResourceId("id/csZbarScannerInstructions")).bringToFront();
     //    findViewById(getResourceId("id/csZbarScannerSightContainer"))
     //        .bringToFront();
-    findViewById(getResourceId("id/csZbarScannerSight")).bringToFront();
+    View line = findViewById(getResourceId("id/csZbarScannerSight"));
+    line.bringToFront();
+
     scannerView.requestLayout();
     scannerView.invalidate();
+    scannerView.post(new Runnable() {
+      @Override
+      public void run() {
+        NiceImageView scanView = findViewById(getResourceId("id/scanImage"));
+        Animation verticalAnimation = new TranslateAnimation(
+            0, 0, scanView.getTop(), scanView.getBottom());
+        verticalAnimation.setDuration(2000);
+        verticalAnimation.setRepeatCount(Animation.INFINITE);
+        line.setAnimation(verticalAnimation);
+        verticalAnimation.startNow();
+        //         applyBlur(findViewById(R.id.scanLayout));
+        //         applyBlur(findViewById(R.id.coverLeft));
+        //         applyBlur(findViewById(R.id.coverRight));
+        //         applyBlur(findViewById(R.id.coverBottom));
+      }
+    });
   }
 
   @Override
@@ -437,7 +456,7 @@ public class ZBarScannerActivity
         barcode.setData(data);
 
         int[] scanIVPosition = new int[2];
-        ImageView scanIV = findViewById(getResourceId("id/scanImage"));
+        NiceImageView scanIV = findViewById(getResourceId("id/scanImage"));
         scanIV.getLocationOnScreen(scanIVPosition);
         // 设置扫描有效区域
         barcode.setCrop(scanIVPosition[0], scanIVPosition[1], scanIV.getWidth(),
@@ -461,6 +480,67 @@ public class ZBarScannerActivity
       }
     }
   };
+
+  private void applyBlur(View v) {
+    //    View view = getWindow().getDecorView();
+    //    view.setDrawingCacheEnabled(true);
+    //    view.buildDrawingCache(true);
+    /**
+     * 获取当前窗口快照，相当于截屏
+     */
+    //    Bitmap bmp1 = view.getDrawingCache();
+    Bitmap bmp1 = getViewBitmap(v);
+    blur(bmp1, v);
+    //    int height = getOtherHeight();
+    //    /**
+    //     * 除去状态栏和标题栏
+    //     */
+    //    Bitmap bmp2 = Bitmap.createBitmap(bmp1, 0, height,bmp1.getWidth(),
+    //    bmp1.getHeight() - height); blur(bmp2, v);
+  }
+
+  public Bitmap getViewBitmap(View view) {
+    Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),
+                                        Bitmap.Config.ARGB_8888);
+    Canvas canvas = new Canvas(bitmap);
+    view.draw(canvas);
+    return bitmap;
+  }
+
+  @SuppressLint("NewApi")
+  private void blur(Bitmap bkg, View view) {
+    long startMs = System.currentTimeMillis();
+    float scaleFactor = 8; //图片缩放比例；
+    float radius = 50;     //模糊程度
+
+    Bitmap overlay = Bitmap.createBitmap(
+        (int)(view.getMeasuredWidth() / scaleFactor),
+        (int)(view.getMeasuredHeight() / scaleFactor), Bitmap.Config.ARGB_8888);
+    Canvas canvas = new Canvas(overlay);
+    canvas.translate(-view.getLeft() / scaleFactor,
+                     -view.getTop() / scaleFactor);
+    canvas.scale(1 / scaleFactor, 1 / scaleFactor);
+    Paint paint = new Paint();
+    paint.setFlags(Paint.FILTER_BITMAP_FLAG);
+    canvas.drawBitmap(bkg, 0, 0, paint);
+
+    overlay = FastBlur.doBlur(overlay, (int)radius, true);
+    view.setBackground(new BitmapDrawable(getResources(), overlay));
+  }
+
+  /**
+   * 获取系统状态栏和软件标题栏，部分软件没有标题栏，看自己软件的配置；
+   * @return
+   */
+  private int getOtherHeight() {
+    Rect frame = new Rect();
+    getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+    int statusBarHeight = frame.top;
+    int contentTop =
+        getWindow().findViewById(Window.ID_ANDROID_CONTENT).getTop();
+    int titleBarHeight = contentTop - statusBarHeight;
+    return statusBarHeight + titleBarHeight;
+  }
 
   // Misc ------------------------------------------------------------
 
