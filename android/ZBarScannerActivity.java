@@ -6,6 +6,7 @@ import java.lang.RuntimeException;
 import android.annotation.SuppressLint;
 import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.Base64;
 import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -194,11 +195,28 @@ public class ZBarScannerActivity
         ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
     scannerSurface.getHolder().addCallback(this);
 
+    ImageView tipImage = findViewById(R.id.tipImage);
+    TextView tipLabel = findViewById(R.id.centerView);
+    tipLabel.setText(textTitle);
+    if (textInstructions.length() > 0) {
+      Bitmap bp = stringToBitmap(textInstructions);
+      tipImage.setImageBitmap(bp);
+      tipImage.setVisibility(View.VISIBLE);
+    } else {
+      tipImage.setVisibility(View.GONE);
+    }
+
     // Add preview SurfaceView to the screen
     FrameLayout scannerView =
         (FrameLayout)findViewById(getResourceId("id/csZbarScannerView"));
     scannerView.addView(scannerSurface);
-
+    ImageView backButton = findViewById(R.id.backButton);
+    backButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        finish();
+      }
+    });
     //    findViewById(getResourceId("id/csZbarScannerTitle")).bringToFront();
     //    findViewById(getResourceId("id/csZbarScannerInstructions")).bringToFront();
     //    findViewById(getResourceId("id/csZbarScannerSightContainer"))
@@ -224,6 +242,18 @@ public class ZBarScannerActivity
         //         applyBlur(findViewById(R.id.coverBottom));
       }
     });
+  }
+
+  public static Bitmap stringToBitmap(String string) {
+    Bitmap bitmap = null;
+    try {
+      byte[] bitmapArray = Base64.decode(string.split(",")[1], Base64.DEFAULT);
+      bitmap =
+          BitmapFactory.decodeByteArray(bitmapArray, 0, bitmapArray.length);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return bitmap;
   }
 
   @Override
@@ -382,7 +412,7 @@ public class ZBarScannerActivity
           !(camParams.getFlashMode().equals(Parameters.FLASH_MODE_ON))) {
         camParams.setFlashMode(Parameters.FLASH_MODE_TORCH);
       } else // if(camParams.getFlashMode() == Parameters.FLASH_MODE_ON ||
-             // camParams.getFlashMode()== Parameters.FLASH_MODE_TORCH)
+      // camParams.getFlashMode()== Parameters.FLASH_MODE_TORCH)
       {
         camParams.setFlashMode(Parameters.FLASH_MODE_OFF);
       }
@@ -530,6 +560,7 @@ public class ZBarScannerActivity
 
   /**
    * 获取系统状态栏和软件标题栏，部分软件没有标题栏，看自己软件的配置；
+   *
    * @return
    */
   private int getOtherHeight() {

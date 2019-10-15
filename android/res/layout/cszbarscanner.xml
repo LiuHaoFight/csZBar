@@ -17,10 +17,11 @@
             android:background="@color/csZbarScannerTextBackground">
 
         <ImageView
+                android:id="@+id/backButton"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:padding="10dp"
-                android:src="@drawable/ic_action_discard_dark" />
+                android:src="@drawable/icon_back_white_34x34" />
     </RelativeLayout>
 
         <RelativeLayout
@@ -86,11 +87,14 @@
 
 
         <com.shehuan.niv.NiceImageView
+                android:id="@+id/tipImage"
                 android:layout_width="220dp"
                 android:layout_height="220dp"
                 android:layout_below="@+id/centerView"
                 android:layout_centerHorizontal="true"
                 app:corner_radius="12dp"
+                android:visibility="gone"
+                android:adjustViewBounds="true"
                 android:src="#fff" />
 
 
