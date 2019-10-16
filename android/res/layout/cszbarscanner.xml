@@ -92,7 +92,6 @@
                 android:layout_height="220dp"
                 android:layout_below="@+id/centerView"
                 android:layout_centerHorizontal="true"
-                app:corner_radius="12dp"
                 android:visibility="gone"
                 android:adjustViewBounds="true"
                 android:src="#fff" />

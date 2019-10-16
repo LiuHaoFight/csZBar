@@ -85,7 +85,7 @@
 
 - (NSString *)tip {
   if (nil == _tip) {
-    _tip = @"请扫描设备后盖的二维码";
+    _tip = @"请对准二维码";
   }
   return _tip;
 }
@@ -114,7 +114,9 @@
 {
   NSArray *arguments = command.arguments;
   if (arguments.count > 0) {
-    self.imgBaseStr = [NSString stringWithFormat:@"%@", arguments.firstObject];
+    NSDictionary *dict = arguments.firstObject;
+    self.tip = dict[@"text_title"];
+    self.imgBaseStr = dict[@"text_instructions"];
   }
   if (self.scanInProgress) {
     [self.commandDelegate
@@ -242,7 +244,8 @@
     [self.scanReader.view addSubview:tipLabel];
     CGFloat masOffset = 0;
     if ([UIScreen mainScreen].bounds.size.height > 667) {
-      masOffset = -self.statusHeight - 6 - 34;
+      //      masOffset = -self.statusHeight - 6 - 34;
+      masOffset = -self.statusHeight - 6;
     }
     [tipLabel mas_makeConstraints:^(MASConstraintMaker *make) {
       make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
@@ -332,14 +335,20 @@
     }];
     [scanImage layoutIfNeeded];
 
+    NSURL *imageUrl = [NSURL URLWithString:self.imgBaseStr];
     UIImageView *tipImageView = [[UIImageView alloc]
-        initWithImage:[UIImage imageWithData:[self.imgBaseStr
-                                                 dataUsingEncoding:
-                                                     NSUTF8StringEncoding]]];
+        initWithImage:[UIImage
+                          imageWithData:[NSData
+                                            dataWithContentsOfURL:imageUrl]]];
     tipImageView.layer.cornerRadius = 10.0;
     tipImageView.layer.masksToBounds = YES;
-    tipImageView.backgroundColor = [UIColor whiteColor];
+    tipImageView.contentMode = UIViewContentModeScaleAspectFill;
     [self.scanReader.view addSubview:tipImageView];
+    if (self.imgBaseStr.length > 1) {
+      tipImageView.hidden = false;
+    } else {
+      tipImageView.hidden = true;
+    }
     [tipImageView mas_makeConstraints:^(MASConstraintMaker *make) {
       make.top.mas_equalTo(tipLabel.mas_bottom).mas_offset(20);
       make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
@@ -380,6 +389,7 @@
     CGRect sc = [self getPortraitModeScanCropRect:maskRect
                                    forOverlayView:self.scanReader.readerView];
     self.scanReader.scanCrop = sc;
+    self.scanReader.modalPresentationStyle = UIModalPresentationFullScreen;
     [self.viewController presentViewController:self.scanReader
                                       animated:YES
                                     completion:^{

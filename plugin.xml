@@ -125,6 +125,7 @@
         <resource-file src="ios/Resources/saoyisao@3x.png" />
         <resource-file src="ios/Resources/saoyisao-3@2x.png" />
         <resource-file src="ios/Resources/saoyisao-3@3x.png" />
+        <resource-file src="ios/Resources/icon_back_white_34x34.png"/>
     </platform>
 
 </plugin>
