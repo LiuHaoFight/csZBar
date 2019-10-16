@@ -45,9 +45,12 @@
         </config-file>
         <framework src="com.android.support:appcompat-v7:27.1.1" />
         <resource-file src="android/res/layout/cszbarscanner.xml" target="res/layout/cszbarscanner.xml" />
+        <resource-file src="android/res/attrs.xml" target="res/values/attrs.xml" />
         <source-file src="android/ZBarcodeFormat.java" target-dir="src/org/cloudsky/cordovaPlugins" />
         <source-file src="android/ZBar.java" target-dir="src/org/cloudsky/cordovaPlugins" />
         <source-file src="android/ZBarScannerActivity.java" target-dir="src/org/cloudsky/cordovaPlugins" />
+        <source-file src="android/shehuan/niv/NiceImageView.java" target-dir="src/com/shehuan/niv" />
+        <source-file src="android/shehuan/niv/Utils.java" target-dir="src/com/shehuan/niv" />
         <source-file src="android/libs/zbar.jar" target-dir="libs" />
         <source-file src="android/libs/armeabi/libiconv.so" target-dir="libs/armeabi" />
         <source-file src="android/libs/armeabi/libzbarjni.so" target-dir="libs/armeabi" />

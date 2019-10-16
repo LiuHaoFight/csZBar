@@ -3,9 +3,7 @@ package org.cloudsky.cordovaPlugins;
 import java.io.IOException;
 import java.lang.RuntimeException;
 
-import android.annotation.SuppressLint;
 import android.graphics.*;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.Base64;
 import android.view.*;
 import android.view.animation.Animation;
@@ -35,11 +33,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.content.pm.PackageManager;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
 
 import net.sourceforge.zbar.ImageScanner;
 import net.sourceforge.zbar.Image;
@@ -510,68 +504,6 @@ public class ZBarScannerActivity
       }
     }
   };
-
-  private void applyBlur(View v) {
-    //    View view = getWindow().getDecorView();
-    //    view.setDrawingCacheEnabled(true);
-    //    view.buildDrawingCache(true);
-    /**
-     * 获取当前窗口快照，相当于截屏
-     */
-    //    Bitmap bmp1 = view.getDrawingCache();
-    Bitmap bmp1 = getViewBitmap(v);
-    blur(bmp1, v);
-    //    int height = getOtherHeight();
-    //    /**
-    //     * 除去状态栏和标题栏
-    //     */
-    //    Bitmap bmp2 = Bitmap.createBitmap(bmp1, 0, height,bmp1.getWidth(),
-    //    bmp1.getHeight() - height); blur(bmp2, v);
-  }
-
-  public Bitmap getViewBitmap(View view) {
-    Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),
-                                        Bitmap.Config.ARGB_8888);
-    Canvas canvas = new Canvas(bitmap);
-    view.draw(canvas);
-    return bitmap;
-  }
-
-  @SuppressLint("NewApi")
-  private void blur(Bitmap bkg, View view) {
-    long startMs = System.currentTimeMillis();
-    float scaleFactor = 8; //图片缩放比例；
-    float radius = 50;     //模糊程度
-
-    Bitmap overlay = Bitmap.createBitmap(
-        (int)(view.getMeasuredWidth() / scaleFactor),
-        (int)(view.getMeasuredHeight() / scaleFactor), Bitmap.Config.ARGB_8888);
-    Canvas canvas = new Canvas(overlay);
-    canvas.translate(-view.getLeft() / scaleFactor,
-                     -view.getTop() / scaleFactor);
-    canvas.scale(1 / scaleFactor, 1 / scaleFactor);
-    Paint paint = new Paint();
-    paint.setFlags(Paint.FILTER_BITMAP_FLAG);
-    canvas.drawBitmap(bkg, 0, 0, paint);
-
-    overlay = FastBlur.doBlur(overlay, (int)radius, true);
-    view.setBackground(new BitmapDrawable(getResources(), overlay));
-  }
-
-  /**
-   * 获取系统状态栏和软件标题栏，部分软件没有标题栏，看自己软件的配置；
-   *
-   * @return
-   */
-  private int getOtherHeight() {
-    Rect frame = new Rect();
-    getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
-    int statusBarHeight = frame.top;
-    int contentTop =
-        getWindow().findViewById(Window.ID_ANDROID_CONTENT).getTop();
-    int titleBarHeight = contentTop - statusBarHeight;
-    return statusBarHeight + titleBarHeight;
-  }
 
   // Misc ------------------------------------------------------------
 
