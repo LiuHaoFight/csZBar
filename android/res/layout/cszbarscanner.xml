@@ -1,101 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/activity_scan"
+    >
+
+    <cn.bingoogolapple.qrcode.zxing.ZXingView
+        android:id="@+id/zxingview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <FrameLayout
-            android:id="@+id/csZbarScannerView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        app:qrcv_animTime="1000"
+        app:qrcv_barCodeTipText=""
+        app:qrcv_barcodeRectHeight="120dp"
+        app:qrcv_borderColor="@android:color/white"
+        app:qrcv_borderSize="1dp"
+        app:qrcv_cornerDisplayType="center"
+        app:qrcv_cornerLength="20dp"
+        app:qrcv_cornerSize="3dp"
+        app:qrcv_isAutoZoom="true"
+        app:qrcv_isBarcode="false"
+        app:qrcv_isOnlyDecodeScanBoxArea="true"
+        app:qrcv_customScanLineDrawable="@drawable/blue_scan_line"
+        app:qrcv_isScanLineReverse="true"
+        app:qrcv_isShowDefaultGridScanLineDrawable="false"
+        app:qrcv_isShowDefaultScanLineDrawable="false"
+        app:qrcv_isShowLocationPoint="false"
+        app:qrcv_isShowTipBackground="false"
+        app:qrcv_isShowTipTextAsSingleLine="false"
+        app:qrcv_isTipTextBelowRect="false"
+        app:qrcv_maskColor="#E6A8A8A8"
+        app:qrcv_rectWidth="200dp"
+        app:qrcv_scanLineColor="#f00"
+        app:qrcv_scanLineMargin="-15dp"
+        app:qrcv_scanLineSize="1dp"
+        app:qrcv_tipTextColor="@android:color/white"
+        app:qrcv_tipTextSize="12sp"
+        app:qrcv_toolbarHeight="0dp"
+        app:qrcv_topOffset="100dp"
+        app:qrcv_verticalBias="-1" />
 
     <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/scanLayout"
-            android:layout_alignParentTop="true"
-            android:background="@color/csZbarScannerTextBackground">
+        android:id="@+id/backLayout"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentTop="true">
 
         <ImageView
-                android:id="@+id/backButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:padding="10dp"
-                android:src="@drawable/icon_back_white_34x34" />
+            android:id="@+id/backButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:padding="10dp"
+            android:src="@drawable/icon_back_white_34x34" />
     </RelativeLayout>
 
-        <RelativeLayout
-                android:id="@+id/scanLayout"
-                android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:layout_above="@id/centerView"
-                android:orientation="horizontal">
 
-            <View
-                    android:id="@+id/coverLeft"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_toLeftOf="@+id/scanImage"
-                    android:layout_weight="1"
-                    android:background="@color/csZbarScannerTextBackground" />
+    <TextView
+        android:id="@+id/centerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/backLayout"
+        android:layout_marginTop="220dp"
+        android:gravity="center"
+        android:text=""
+        android:textColor="#fff"
+        android:textSize="15sp"
+        android:textStyle="bold" />
 
-            <com.shehuan.niv.NiceImageView
-                    android:id="@+id/scanImage"
-                    android:layout_width="220dp"
-                    android:layout_height="220dp"
-                    android:layout_centerInParent="true"
-                    app:corner_radius="12dp"
-                    app:border_color="@color/csZbarScannerTextBackground"
-                    android:background="#00000000" />
+    <LinearLayout
+        android:id="@+id/bottomLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/centerView"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
+        >
 
-            <View
-                    android:id="@+id/coverRight"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_toRightOf="@id/scanImage"
-                    android:background="@color/csZbarScannerTextBackground" />
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/scanImage"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:layout_centerInParent="true"
+            android:scaleType="centerCrop"
+            android:background="@drawable/shape_round_corner"
+            android:visibility="gone"
+            app:riv_corner_radius="20dp"
+            app:riv_tile_mode="repeat"
+            app:riv_oval="false"
+            app:riv_mutate_background="true"
+            />
 
-            <View
-                    android:id="@+id/csZbarScannerSight"
-                    android:layout_width="260dp"
-                    android:layout_height="1dp"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"
-                    android:background="#41AAAA"
-                    android:gravity="center_vertical" />
-
-        </RelativeLayout>
-
-        <View
-                android:id="@+id/coverBottom"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/scanLayout"
-                android:background="@color/csZbarScannerTextBackground" />
-
-        <TextView
-                android:id="@+id/centerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:gravity="center"
-                android:layout_margin="30dp"
-                android:text="请扫描设备后盖的二维码"
-                android:textColor="#fff"
-                android:textStyle="bold"
-                android:textSize="16sp" />
-
-
-        <com.shehuan.niv.NiceImageView
-                android:id="@+id/tipImage"
-                android:layout_width="220dp"
-                android:layout_height="220dp"
-                android:layout_below="@+id/centerView"
-                android:layout_centerHorizontal="true"
-                android:visibility="gone"
-                android:adjustViewBounds="true"
-                android:src="#fff" />
-
-
+    </LinearLayout>
 
 </RelativeLayout>
+

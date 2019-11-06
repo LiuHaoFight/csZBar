@@ -1,6 +1,6 @@
 {
   "name": "@osvlabs/cordova-plugin-cszbar-vitta",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Plugin to integrate with the ZBar barcode scanning library.",
   "cordova": {
     "id": "cordova-plugin-cszbar-vitta",
@@ -24,8 +24,7 @@
     "cordova-android",
     "cordova-ios"
   ],
-  "engines": [
-    {
+  "engines": [{
       "name": "cordova-android",
       "version": ">=3.0.0"
     },
