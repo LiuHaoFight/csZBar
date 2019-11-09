@@ -1,14 +1,15 @@
 #import "CsZBar.h"
 #import "AlmaZBarReaderViewController.h"
+#import "WLScanViewController.h"
 #import <AVFoundation/AVFoundation.h>
 #import <Masonry.h>
 
 #pragma mark - State
 
-@interface CsZBar ()
+@interface CsZBar ()<LBXScanViewControllerDelegate>
 @property bool scanInProgress;
 @property NSString *scanCallbackId;
-@property AlmaZBarReaderViewController *scanReader;
+@property WLScanViewController *scanReader;
 @property(nonatomic, strong) UIView *maskView;
 @property(nonatomic, strong) UIView *scanView;
 @property(nonatomic, strong) NSString *tip;
@@ -39,34 +40,6 @@
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)didChangeRotate:(NSNotification *)notice {
-  if (nil != self.maskView) {
-    [self.maskView.superview layoutIfNeeded];
-    [self.scanView.superview layoutIfNeeded];
-    [self.scanReader.readerView.superview layoutIfNeeded];
-    CGRect maskRect = self.scanView.frame;
-    [self.scanReader.view
-        setFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width,
-                            [UIScreen mainScreen].bounds.size.height)];
-
-    //从蒙版中扣出扫描框那一块,这块的大小尺寸将来也设成扫描输出的作用域大小
-
-    UIBezierPath *maskPath =
-        [UIBezierPath bezierPathWithRect:self.scanReader.view.bounds];
-    UIBezierPath *appendPath = [UIBezierPath bezierPathWithRoundedRect:maskRect
-                                                          cornerRadius:12.0];
-    [maskPath appendPath:[appendPath bezierPathByReversingPath]];
-
-    CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
-    maskLayer.path = maskPath.CGPath;
-    [self.maskView.layer.mask removeFromSuperlayer];
-    self.maskView.layer.mask = maskLayer;
-    CGRect sc = [self getScanCrop:maskRect
-                 readerViewBounds:self.scanReader.readerView.bounds];
-    self.scanReader.scanCrop = sc;
-  }
 }
 
 - (void)willRotateToInterfaceOrientation:
@@ -127,99 +100,31 @@
   } else {
     self.scanInProgress = YES;
     self.scanCallbackId = [command callbackId];
-    self.scanReader = [AlmaZBarReaderViewController new];
-
-    self.scanReader.readerDelegate = self;
-    self.scanReader.supportedOrientationsMask =
-        ZBarOrientationMask(UIInterfaceOrientationPortrait);
+    self.scanReader = [[WLScanViewController alloc] init];
+    self.scanReader.isOpenInterestRect = YES;
+    self.scanReader.delegate = self;
 
     // Get user parameters
     NSDictionary *params = (NSDictionary *)[command argumentAtIndex:0];
-    NSString *camera = [params objectForKey:@"camera"];
-    if ([camera isEqualToString:@"front"]) {
-      // We do not set any specific device for the default "back" setting,
-      // as not all devices will have a rear-facing camera.
-      self.scanReader.cameraDevice = UIImagePickerControllerCameraDeviceFront;
-    }
-    self.scanReader.cameraFlashMode = UIImagePickerControllerCameraFlashModeOn;
+    NSString *camera = params[@"camera"];
 
-    NSString *flash = [params objectForKey:@"flash"];
 
-    if ([flash isEqualToString:@"on"]) {
-      self.scanReader.cameraFlashMode =
-          UIImagePickerControllerCameraFlashModeOn;
-    } else if ([flash isEqualToString:@"off"]) {
-      self.scanReader.cameraFlashMode =
-          UIImagePickerControllerCameraFlashModeOff;
-    } else if ([flash isEqualToString:@"auto"]) {
-      self.scanReader.cameraFlashMode =
-          UIImagePickerControllerCameraFlashModeAuto;
-    }
-
-    // Hack to hide the bottom bar's Info button... originally based on
-    // http://stackoverflow.com/a/16353530
-    NSInteger infoButtonIndex;
-    if ([[[UIDevice currentDevice] systemVersion]
-            compare:@"10.0"
-            options:NSNumericSearch] != NSOrderedAscending) {
-      infoButtonIndex = 1;
-    } else {
-      infoButtonIndex = 3;
-    }
-
-    UIView *toolView = self.scanReader.view.subviews[2];
-    UIToolbar *tb = toolView.subviews[0];
-    [toolView removeFromSuperview];
-    //        tb.frame = CGRectMake(0, 0, 320, 22);
-    NSMutableArray *barButtonItems = [NSMutableArray arrayWithArray:tb.items];
-    [barButtonItems removeLastObject];
-    [tb setItems:barButtonItems];
-
-    // UIView *infoButton = [[[[[self.scanReader.view.subviews objectAtIndex:2]
-    // subviews] objectAtIndex:0] subviews] objectAtIndex:infoButtonIndex];
-    // [infoButton setHidden:YES];
-
-    // UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem]; [button
-    // setTitle:@"Press Me" forState:UIControlStateNormal]; [button sizeToFit];
-    // [self.view addSubview:button];
     CGRect screenRect = [[UIScreen mainScreen] bounds];
     CGFloat screenWidth = screenRect.size.width;
     CGFloat screenHeight = screenRect.size.height;
 
-    BOOL drawSight = [params objectForKey:@"drawSight"]
-                         ? [[params objectForKey:@"drawSight"] boolValue]
+    BOOL drawSight = params[@"drawSight"]
+                         ? [params[@"drawSight"] boolValue]
                          : true;
-    UIToolbar *toolbarViewFlash = [[UIToolbar alloc] init];
 
-    // The bar length it depends on the orientation
-    toolbarViewFlash.frame = CGRectMake(
-        0.0, 0, (screenWidth > screenHeight ? screenWidth : screenHeight),
-        44.0);
-    toolbarViewFlash.barStyle = UIBarStyleBlackOpaque;
-    UIBarButtonItem *buttonFlash =
-        [[UIBarButtonItem alloc] initWithTitle:@"Flash"
-                                         style:UIBarButtonItemStyleDone
-                                        target:self
-                                        action:@selector(toggleflash)];
 
-    NSArray *buttons = [NSArray arrayWithObjects:buttonFlash, nil];
-    [toolbarViewFlash setItems:buttons animated:NO];
-    //        [self.scanReader.view addSubview:toolbarViewFlash];
-
-    //        if (drawSight) {
     CGFloat dim =
         screenWidth < screenHeight ? screenWidth / 1.1 : screenHeight / 1.1;
     UIView *polygonView = [[UIView alloc]
         initWithFrame:CGRectMake((screenWidth / 2) - (dim / 2),
                                  (screenHeight / 2) - (dim / 2), dim, dim)];
 
-    //    UIView *lineView =
-    //        [[UIView alloc] initWithFrame:CGRectMake(0, dim / 2, dim, 1)];
-    //    lineView.backgroundColor = [UIColor redColor];
-    //    [polygonView addSubview:lineView];
 
-    self.scanReader.cameraOverlayView = polygonView;
-    //        }
     UIButton *backButton = [[UIButton alloc]
         initWithFrame:CGRectMake(16, 6 + self.statusHeight, 34, 34)];
     [backButton setImage:[UIImage imageNamed:@"icon_back_white_34x34.png"]
@@ -249,16 +154,15 @@
     }
     [tipLabel mas_makeConstraints:^(MASConstraintMaker *make) {
       make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
-      make.centerY.mas_equalTo(self.scanReader.view.mas_centerY)
-          .mas_offset(masOffset);
+      make.centerY.mas_equalTo(self.scanReader.view.mas_centerY);
     }];
     [tipLabel.superview layoutIfNeeded];
     CGFloat imageX = screenWidth * 0.15;
     CGFloat imageY = screenWidth * 0.15 + 64;
-    CGFloat scanW = 200;
-    CGFloat scanH = 200;
+      CGFloat scanW = [UIScreen mainScreen].bounds.size.width > 350 ? 250 : 200;
+    CGFloat scanH = scanW;
     CGRect maskRect =
-        CGRectMake((self.scanReader.view.frame.size.width - 200) * 0.5,
+        CGRectMake((self.scanReader.view.frame.size.width - scanW) * 0.5,
                    6 + 34 + self.statusHeight, scanW, scanH);
     CGFloat marginY = (self.scanReader.view.frame.size.height - 6 - 34 -
                        self.statusHeight - self.tipSize.height) *
@@ -368,27 +272,13 @@
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
     maskLayer.path = maskPath.CGPath;
     maskView.layer.mask = maskLayer;
-    for (int i = 0; i <= self.scanReader.view.subviews.count - 1; i++) {
-      UIView *tempView = self.scanReader.view.subviews[i];
-      if (![tempView isKindOfClass:NSClassFromString(@"ZBarReaderViewImpl")]) {
-        continue;
-      } else {
-        [tempView mas_makeConstraints:^(MASConstraintMaker *make) {
-          make.edges.mas_equalTo(self.scanReader.view);
-        }];
-        [tempView.superview layoutIfNeeded];
-      }
-    }
 
     [self.scanReader.view bringSubviewToFront:backButton];
     [self.scanReader.view bringSubviewToFront:scanImage];
     [self.scanReader.view bringSubviewToFront:tipImageView];
     [self.scanReader.view bringSubviewToFront:tipLabel];
-    //        CGRect sc = [self getScanCrop:maskRect
-    //        readerViewBounds:self.scanReader.readerView.bounds];
-    CGRect sc = [self getPortraitModeScanCropRect:maskRect
-                                   forOverlayView:self.scanReader.readerView];
-    self.scanReader.scanCrop = sc;
+      CGRect sc = [self getZXingScanRectWithPreView:self.scanReader.view];
+    self.scanReader.cropRect = sc;
     self.scanReader.modalPresentationStyle = UIModalPresentationFullScreen;
     [self.viewController presentViewController:self.scanReader
                                       animated:YES
@@ -419,16 +309,26 @@
   [self.scanReader dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (CGRect)getScanCrop:(CGRect)rect readerViewBounds:(CGRect)readerViewBounds {
-  CGFloat x, y, width, height;
-
-  x = rect.origin.x / readerViewBounds.size.width;
-  y = rect.origin.y / readerViewBounds.size.height;
-  width = rect.size.width / readerViewBounds.size.width;
-  height = rect.size.height / readerViewBounds.size.height;
-
-  return CGRectMake(x, y, width, height);
+//根据矩形区域，获取识别区域
+- (CGRect)getZXingScanRectWithPreView:(UIView*)view {
+    [self.scanView layoutIfNeeded];
+    int XRetangleLeft = self.scanView.frame.origin.x;
+    CGSize sizeRetangle = CGSizeMake(view.frame.size.width - XRetangleLeft*2, view.frame.size.width - XRetangleLeft*2);
+    //扫码区域Y轴最小坐标
+    CGFloat my = (view.frame.size.height - self.scanView.frame.size.height - self.scanView.frame.origin.y) * 0.5;
+    CGFloat YMinRetangle = view.frame.size.height / 2.0 - sizeRetangle.height/2.0 - my;
+    
+    XRetangleLeft = XRetangleLeft/view.frame.size.width * 1080;
+    YMinRetangle = YMinRetangle / view.frame.size.height * 1920;
+    CGFloat width  = sizeRetangle.width / view.frame.size.width * 1080;
+    CGFloat height = sizeRetangle.height / view.frame.size.height * 1920;
+    
+    //扫码区域坐标
+    CGRect cropRect =  CGRectMake(XRetangleLeft, YMinRetangle, width,height);
+    
+    return cropRect;
 }
+
 
 - (CGRect)getPortraitModeScanCropRect:(CGRect)overlayCropRect
                        forOverlayView:(UIView *)readerView {
@@ -449,28 +349,63 @@
   return scanCropRect;
 }
 
-- (void)toggleflash {
-  AVCaptureDevice *device =
-      [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-
-  [device lockForConfiguration:nil];
-  if (device.torchAvailable == 1) {
-    if (device.torchMode == 0) {
-      [device setTorchMode:AVCaptureTorchModeOn];
-      [device setFlashMode:AVCaptureFlashModeOn];
-    } else {
-      [device setTorchMode:AVCaptureTorchModeOff];
-      [device setFlashMode:AVCaptureFlashModeOff];
-    }
-  }
-
-  [device unlockForConfiguration];
-}
-
 #pragma mark - Helpers
 
 - (void)sendScanResult:(CDVPluginResult *)result {
   [self.commandDelegate sendPluginResult:result callbackId:self.scanCallbackId];
+}
+
+#pragma mark - WLScanViewControllerDelegate
+- (void)scanResultWithArray:(NSArray<LBXScanResult*>*)array
+{
+    if (!array ||  array.count < 1)
+    {
+        // 没扫到
+        [self.scanReader
+                dismissViewControllerAnimated:YES
+                                   completion:^(void) {
+                                       self.scanInProgress = NO;
+                                       [self sendScanResult:
+                                               [CDVPluginResult
+                                                       resultWithStatus:CDVCommandStatus_ERROR
+                                                        messageAsString:@"Failed"]];
+                                   }];
+        return;
+    }
+
+    //经测试，可以ZXing同时识别2个二维码，不能同时识别二维码和条形码
+
+
+    LBXScanResult *scanResult = array[0];
+
+    NSString*strResult = scanResult.strScanned;
+
+
+    if (!strResult) {
+
+        // 没扫到
+        [self.scanReader
+                dismissViewControllerAnimated:YES
+                                   completion:^(void) {
+                                       self.scanInProgress = NO;
+                                       [self sendScanResult:
+                                               [CDVPluginResult
+                                                       resultWithStatus:CDVCommandStatus_ERROR
+                                                        messageAsString:@"Failed"]];
+                                   }];
+        return;
+    }
+
+    [self.scanReader
+            dismissViewControllerAnimated:YES
+                               completion:^(void) {
+                                   self.scanInProgress = NO;
+                                   [self sendScanResult:
+                                           [CDVPluginResult
+                                                   resultWithStatus:CDVCommandStatus_OK
+                                                    messageAsString:strResult]];
+                               }];
+
 }
 
 #pragma mark - ZBarReaderDelegate

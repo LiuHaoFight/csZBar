@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="cordova-plugin-cszbar" version="1.4.3">
+        id="cordova-plugin-cszbar" version="1.4.4">
 
     <engines>
         <engine name="cordova" version=">=3.0.0" />
@@ -104,9 +104,12 @@
         <framework src="QuartzCore.framework" />
         <framework src="libiconv.dylib" />
         <framework src="Masonry" type="podspec" spec="~> 1.1.0"/>
+        <framework src="LBXScan/LBXZXing" type="podspec" spec="~> 2.3"/>
         <source-file src="ios/libzbar.a" framework="true" custom="true"/>
         <source-file src="ios/CsZBar.m" />
         <header-file src="ios/CsZBar.h" />
+        <header-file src="ios/WLScanViewController.h" />
+        <source-file src="ios/WLScanViewController.m" />
         <source-file src="ios/AlmaZBarReaderViewController.m" />
         <header-file src="ios/AlmaZBarReaderViewController.h" />
         <header-file src="ios/ZBarSDK/ZBarCameraSimulator.h" />
