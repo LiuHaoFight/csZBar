@@ -426,6 +426,24 @@
     return YES;
 }
 
+#pragma mark    禁止横屏
+
+-(BOOL)shouldAutorotate{
+
+return NO;
+}
+
+- (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
+return (toInterfaceOrientation == UIInterfaceOrientationMaskPortrait);
+
+}
+
+
+- (NSUInteger)supportedInterfaceOrientations {
+return UIInterfaceOrientationMaskPortrait;
+
+}
+
 
 
 
