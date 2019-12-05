@@ -6,7 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <ZXingWrapper.h>
+#import <LBXScanNative.h>
 #import <LBXScanTypes.h>
 
 @class LBXScanResult;
