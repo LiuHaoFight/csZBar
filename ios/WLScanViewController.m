@@ -31,8 +31,7 @@
 
 }
 
-- (void)viewDidAppear:(BOOL)animated
-{
+- (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 
     [self drawScanView];
@@ -50,14 +49,12 @@
 }
 
 //绘制扫描区域
-- (void)drawScanView
-{
+- (void)drawScanView {
 
 }
 
-- (void)reStartDevice
-{
-    [_zxingObj start];
+- (void)reStartDevice {
+    [_scanObj startScan];
 
 }
 
@@ -82,43 +79,31 @@
 }
 
 //启动设备
-- (void)startScan
-{
-    UIView *videoView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame))];
+- (void)startScan {
+    UIView *videoView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame))];
     videoView.backgroundColor = [UIColor clearColor];
     [self.view insertSubview:videoView atIndex:0];
-    __weak __typeof(self) weakSelf = self;
 
-    if (!_zxingObj) {
+    if (!_scanObj) {
+        NSString *strCode = AVMetadataObjectTypeQRCode;
+        if (_scanCodeType != SCT_BarCodeITF) {
+
+            strCode = [self nativeCodeWithType:_scanCodeType];
+        }
 
         __weak __typeof(self) weakSelf = self;
-        self.zxingObj = [[ZXingWrapper alloc]initWithPreView:videoView block:^(ZXBarcodeFormat barcodeFormat, NSString *str, UIImage *scanImg) {
+        self.scanObj = [[LBXScanNative alloc] initWithPreView:videoView ObjectType:@[strCode] cropRect:self.cropRect success:^(NSArray<LBXScanResult *> *array) {
 
-            LBXScanResult *result = [[LBXScanResult alloc]init];
-            result.strScanned = str;
-            result.imgScanned = scanImg;
-            result.strBarCodeType = [weakSelf convertZXBarcodeFormat:barcodeFormat];
-            
-
-            [weakSelf scanResultWithArray:@[result]];
-
+            [weakSelf scanResultWithArray:array];
         }];
-
-        if (_isOpenInterestRect) {
-            //设置只识别框内区域
-            if (!CGRectEqualToRect(self.cropRect, CGRectZero)) {
-                [_zxingObj setScanRect:self.cropRect];
-            }
-        }
     }
-    [_zxingObj start];
+    [_scanObj startScan];
 
     self.view.backgroundColor = [UIColor clearColor];
 }
 
 
-- (void)viewWillDisappear:(BOOL)animated
-{
+- (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
 
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
@@ -127,15 +112,13 @@
 
 }
 
-- (void)stopScan
-{
-    [_zxingObj stop];
+- (void)stopScan {
+    [_scanObj stopScan];
 }
 
 #pragma mark -扫码结果处理
 
-- (void)scanResultWithArray:(NSArray<LBXScanResult*>*)array
-{
+- (void)scanResultWithArray:(NSArray<LBXScanResult *> *)array {
     //设置了委托的处理
     if (_delegate) {
         [_delegate scanResultWithArray:array];
@@ -145,28 +128,23 @@
 }
 
 
-
 //开关闪光灯
-- (void)openOrCloseFlash
-{
+- (void)openOrCloseFlash {
 
     switch (_libraryType) {
-        case SLT_Native:
-        {
+        case SLT_Native: {
 #ifdef LBXScan_Define_Native
             [_scanObj changeTorch];
 #endif
         }
             break;
-        case SLT_ZXing:
-        {
+        case SLT_ZXing: {
 #ifdef LBXScan_Define_ZXing
             [_zxingObj openOrCloseTorch];
 #endif
         }
             break;
-        case SLT_ZBar:
-        {
+        case SLT_ZBar: {
 #ifdef LBXScan_Define_ZBar
             [_zbarObj openOrCloseFlash];
 #endif
@@ -175,7 +153,7 @@
         default:
             break;
     }
-    self.isOpenFlash =!self.isOpenFlash;
+    self.isOpenFlash = !self.isOpenFlash;
 }
 
 
@@ -184,8 +162,7 @@
 /*!
  *  打开本地照片，选择图片识别
  */
-- (void)openLocalPhoto:(BOOL)allowsEditing
-{
+- (void)openLocalPhoto:(BOOL)allowsEditing {
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
 
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
@@ -203,37 +180,31 @@
 
 //当选择一张图片后进入这里
 
--(void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
-{
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     [picker dismissViewControllerAnimated:YES completion:nil];
 
-    __block UIImage* image = [info objectForKey:UIImagePickerControllerEditedImage];
+    __block UIImage *image = [info objectForKey:UIImagePickerControllerEditedImage];
 
-    if (!image){
+    if (!image) {
         image = [info objectForKey:UIImagePickerControllerOriginalImage];
     }
 
     __weak __typeof(self) weakSelf = self;
 
     switch (_libraryType) {
-        case SLT_Native:
-        {
+        case SLT_Native: {
 #ifdef LBXScan_Define_Native
-            if ([[[UIDevice currentDevice]systemVersion]floatValue] >= 8.0)
-            {
+            if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0) {
                 [LBXScanNative recognizeImage:image success:^(NSArray<LBXScanResult *> *array) {
                     [weakSelf scanResultWithArray:array];
                 }];
-            }
-            else
-            {
+            } else {
                 [self showError:@"native低于ios8.0系统不支持识别图片条码"];
             }
 #endif
         }
             break;
-        case SLT_ZXing:
-        {
+        case SLT_ZXing: {
 #ifdef LBXScan_Define_ZXing
 
             [ZXingWrapper recognizeImage:image block:^(ZXBarcodeFormat barcodeFormat, NSString *str) {
@@ -249,8 +220,7 @@
 
         }
             break;
-        case SLT_ZBar:
-        {
+        case SLT_ZBar: {
 #ifdef LBXScan_Define_ZBar
             [LBXZBarWrapper recognizeImage:image block:^(NSArray<LBXZbarResult *> *result) {
 
@@ -274,8 +244,8 @@
             break;
     }
 }
-- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
-{
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
     NSLog(@"cancel");
 
     [picker dismissViewControllerAnimated:YES completion:nil];
@@ -337,8 +307,7 @@
 #endif
 
 
-- (NSString*)nativeCodeWithType:(SCANCODETYPE)type
-{
+- (NSString *)nativeCodeWithType:(SCANCODETYPE)type {
     switch (type) {
         case SCT_QRCode:
             return AVMetadataObjectTypeQRCode;
@@ -362,15 +331,12 @@
     }
 }
 
-- (void)showError:(NSString*)str
-{
+- (void)showError:(NSString *)str {
 
 }
 
-- (void)requestCameraPemissionWithResult:(void(^)( BOOL granted))completion
-{
-    if ([AVCaptureDevice respondsToSelector:@selector(authorizationStatusForMediaType:)])
-    {
+- (void)requestCameraPemissionWithResult:(void (^)(BOOL granted))completion {
+    if ([AVCaptureDevice respondsToSelector:@selector(authorizationStatusForMediaType:)]) {
         AVAuthorizationStatus permission =
                 [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
 
@@ -382,8 +348,7 @@
             case AVAuthorizationStatusRestricted:
                 completion(NO);
                 break;
-            case AVAuthorizationStatusNotDetermined:
-            {
+            case AVAuthorizationStatusNotDetermined: {
                 [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo
                                          completionHandler:^(BOOL granted) {
 
@@ -405,13 +370,11 @@
 
 }
 
-+ (BOOL)photoPermission
-{
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0)
-    {
++ (BOOL)photoPermission {
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
         ALAuthorizationStatus author = [ALAssetsLibrary authorizationStatus];
 
-        if ( author == ALAuthorizationStatusDenied ) {
+        if (author == ALAuthorizationStatusDenied) {
 
             return NO;
         }
@@ -419,7 +382,7 @@
     }
 
     PHAuthorizationStatus authorStatus = [PHPhotoLibrary authorizationStatus];
-    if ( authorStatus == PHAuthorizationStatusDenied ) {
+    if (authorStatus == PHAuthorizationStatusDenied) {
 
         return NO;
     }
@@ -428,23 +391,21 @@
 
 #pragma mark    禁止横屏
 
--(BOOL)shouldAutorotate{
+- (BOOL)shouldAutorotate {
 
-return NO;
+    return NO;
 }
 
-- (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
-return (toInterfaceOrientation == UIInterfaceOrientationMaskPortrait);
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
+    return (toInterfaceOrientation == UIInterfaceOrientationMaskPortrait);
 
 }
 
 
 - (NSUInteger)supportedInterfaceOrientations {
-return UIInterfaceOrientationMaskPortrait;
+    return UIInterfaceOrientationMaskPortrait;
 
 }
-
-
 
 
 @end
