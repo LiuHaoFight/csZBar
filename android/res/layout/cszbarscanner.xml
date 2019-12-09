@@ -85,7 +85,7 @@
             android:background="@drawable/shape_round_corner"
             android:visibility="gone"
             app:riv_corner_radius="20dp"
-            app:riv_tile_mode="repeat"
+            app:riv_tile_mode="clamp"
             app:riv_oval="false"
             app:riv_mutate_background="true"
             />
