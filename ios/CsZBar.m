@@ -159,6 +159,7 @@
         tipLabel.text = self.tip;
         [tipLabel setTextColor:[UIColor whiteColor]];
         tipLabel.numberOfLines = 0;
+        [tipLabel setTextAlignment:NSTextAlignmentCenter];
         [self.scanReader.view addSubview:tipLabel];
         CGFloat masOffset = 0;
         if ([UIScreen mainScreen].bounds.size.height > 667) {
@@ -168,6 +169,7 @@
         [tipLabel mas_makeConstraints:^(MASConstraintMaker *make) {
             make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
             make.centerY.mas_equalTo(self.scanReader.view.mas_centerY);
+            make.width.mas_equalTo(self.scanReader.view.mas_width);
         }];
         [tipLabel.superview layoutIfNeeded];
         CGFloat imageX = screenWidth * 0.15;
