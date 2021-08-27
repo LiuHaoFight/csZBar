@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -144,9 +145,19 @@ public class ZBarScannerActivity
     String textTitle = params.optString("text_title");
     String textInstructions = params.optString("text_instructions");
     Boolean drawSight = params.optBoolean("drawSight", true);
+    String btnText = params.optString("btn_text");
     whichCamera = params.optString("camera");
     flashMode = params.optString("flash");
     TextView tipLabel = findViewById(getResourceId("id/centerView"));
+    tipLabel.setText(textTitle);
+    Button skipBtn = findViewById(getResourceId("id/skip_btn"));
+    skipBtn.setText(btnText);
+    skipBtn.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        onScanQRCodeSuccess("skip");
+      }
+    });
     tipLabel.setText(textTitle);
     RoundedImageView tipImage = findViewById(getResourceId("id/scanImage"));
     if (textInstructions.length() > 0) {

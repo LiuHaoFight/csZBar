@@ -1,9 +1,9 @@
 {
-  "name": "@osvlabs/cordova-plugin-cszbar-vitta",
+  "name": "cordova-plugin-cszbar",
   "version": "1.5.2",
   "description": "Plugin to integrate with the ZBar barcode scanning library.",
   "cordova": {
-    "id": "cordova-plugin-cszbar-vitta",
+    "id": "cordova-plugin-cszbar",
     "platforms": [
       "android",
       "ios"
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Joker-1991/csZBar"
+    "url": "git+https://github.com/LiuHaoFight/csZBar.git"
   },
   "keywords": [
     "cszbar",
@@ -33,10 +33,10 @@
       "version": ">=3.0.0"
     }
   ],
-  "author": "TJ Woon <tj@cloudsky.org>",
+  "author": "Simon",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/Joker-1991/csZBar/issues"
+    "url": "https://github.com/LiuHaoFight/csZBar/issues"
   },
-  "homepage": "https://github.com/Joker-1991/csZBar#readme"
+  "homepage": "https://github.com/LiuHaoFight/csZBar#readme"
 }
