@@ -13,6 +13,7 @@
 @property(nonatomic, strong) UIView *maskView;
 @property(nonatomic, strong) UIView *scanView;
 @property(nonatomic, strong) NSString *tip;
+@property(nonatomic, strong) NSString *btnText;
 @property(nonatomic, assign) CGSize tipSize;
 @property(nonatomic, assign) CGFloat statusHeight;
 @property(nonatomic, strong) UIView *lineView;
@@ -102,6 +103,7 @@
     if (arguments.count > 0) {
         NSDictionary *dict = arguments.firstObject;
         self.tip = dict[@"text_title"];
+        self.btnText = dict[@"btn_text"];
         self.imgBaseStr = dict[@"text_instructions"];
     }
     if (self.scanInProgress) {
@@ -276,6 +278,30 @@
         [tipImageView setContentMode:UIViewContentModeScaleAspectFit];
         [tipImageView.superview layoutIfNeeded];
 
+        UIButton *skipBtn = [[UIButton alloc] init];
+        [skipBtn setTitle:self.btnText forState:(UIControlStateNormal)];
+        [skipBtn setTitleColor:[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.8] forState:UIControlStateNormal];
+        skipBtn.layer.cornerRadius = 5.0;
+        skipBtn.contentEdgeInsets = UIEdgeInsetsMake(5, 10, 5, 10);
+        [skipBtn.layer setMasksToBounds:YES];
+        [skipBtn.layer setBorderWidth:1.0];
+        CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+        CGColorRef colorref = CGColorCreate(colorSpace,(CGFloat[]){ 255, 255, 255, 0.8 });
+        [skipBtn.layer setBorderColor:colorref];
+        skipBtn.titleLabel.font = [UIFont systemFontOfSize:14];
+        [skipBtn addTarget:self
+                       action:@selector(skipButtonClicked)
+             forControlEvents:UIControlEventTouchUpInside];
+        
+        [self.scanReader.view addSubview:skipBtn];
+        [skipBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.mas_equalTo(tipImageView.mas_bottom).mas_offset(10);
+            make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
+        }];
+        [skipBtn setContentMode:UIViewContentModeScaleAspectFit];
+        [skipBtn.superview layoutIfNeeded];
+        
+        
         //从蒙版中扣出扫描框那一块,这块的大小尺寸将来也设成扫描输出的作用域大小
 
         UIBezierPath *maskPath =
@@ -292,6 +318,7 @@
         [self.scanReader.view bringSubviewToFront:scanImage];
         [self.scanReader.view bringSubviewToFront:tipImageView];
         [self.scanReader.view bringSubviewToFront:tipLabel];
+        [self.scanReader.view bringSubviewToFront:skipBtn];
         CGRect sc = [self getScanRectWithPreView:self.scanReader.view];
         self.scanReader.cropRect = sc;
         self.scanReader.modalPresentationStyle = UIModalPresentationFullScreen;
@@ -322,6 +349,20 @@
 - (void)backButtonClicked {
     self.scanInProgress = NO;
     [self.scanReader dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)skipButtonClicked {
+    NSLog(@"skipButtonClicked");
+    [self.scanReader
+            dismissViewControllerAnimated:YES
+                               completion:^(void) {
+                                        self.scanInProgress = NO;
+                                        [self sendScanResult:
+                                                [CDVPluginResult
+                                                        resultWithStatus:CDVCommandStatus_OK
+                                                         messageAsString:@"skip"]];
+                                    }];
+    
 }
 
 //根据矩形区域，获取识别区域
