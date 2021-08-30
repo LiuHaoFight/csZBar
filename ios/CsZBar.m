@@ -295,7 +295,7 @@
         
         [self.scanReader.view addSubview:skipBtn];
         [skipBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.top.mas_equalTo(tipImageView.mas_bottom).mas_offset(10);
+            make.top.mas_equalTo(tipImageView.mas_bottom).mas_offset(25);
             make.centerX.mas_equalTo(self.scanReader.view.mas_centerX);
         }];
         [skipBtn setContentMode:UIViewContentModeScaleAspectFit];
