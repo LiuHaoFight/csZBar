@@ -293,6 +293,11 @@
                        action:@selector(skipButtonClicked)
              forControlEvents:UIControlEventTouchUpInside];
         
+        if (self.btnText.length == 0) {
+            skipBtn.hidden = YES;
+        } else {
+            skipBtn.hidden = NO;
+        }
         [self.scanReader.view addSubview:skipBtn];
         [skipBtn mas_makeConstraints:^(MASConstraintMaker *make) {
             make.top.mas_equalTo(tipImageView.mas_bottom).mas_offset(25);

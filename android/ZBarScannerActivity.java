@@ -158,6 +158,11 @@ public class ZBarScannerActivity
         onScanQRCodeSuccess("skip");
       }
     });
+    if (btnText.length() > 0) {
+      skipBtn.setVisibility(View.VISIBLE);
+    } else {
+      skipBtn.setVisibility(View.GONE);
+    }
     tipLabel.setText(textTitle);
     RoundedImageView tipImage = findViewById(getResourceId("id/scanImage"));
     if (textInstructions.length() > 0) {
