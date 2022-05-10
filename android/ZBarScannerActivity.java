@@ -14,8 +14,6 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Base64;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -26,6 +24,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.makeramen.roundedimageview.RoundedImageView;
 import net.sourceforge.zbar.ImageScanner;
@@ -38,7 +39,6 @@ import java.util.Collection;
 import cn.bingoogolapple.qrcode.core.QRCodeView;
 import cn.bingoogolapple.qrcode.zxing.ZXingView;
 
-import static android.support.v4.content.res.TypedArrayUtils.getResourceId;
 
 
 public class ZBarScannerActivity
