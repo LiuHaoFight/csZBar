@@ -44,6 +44,8 @@
             <color name="csZbarScannerBackground">#000000</color>
         </config-file>
         <framework src="android/scan.gradle" custom="true" type="gradleReference" />
+        <framework src="androidx.core:core:1.6.0" />
+        <framework src="androidx.appcompat:appcompat:1.3.0" />
         <resource-file src="android/res/layout/cszbarscanner.xml" target="res/layout/cszbarscanner.xml" />
         <resource-file src="android/res/attrs.xml" target="res/values/attrs.xml" />
         <source-file src="android/res/drawable/shape_round_corner.xml" target-dir="res/drawable"/>
